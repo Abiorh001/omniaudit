@@ -1,0 +1,166 @@
+{
+  "generated_at": "2025-11-06T07:49:14.987375Z",
+  "framework": "OmnicoreAgent",
+  "project": "OmniAudit for Avelis",
+  "test_cases": [
+    {
+      "input": {
+        "claim": {
+          "claim_id": "C10045",
+          "member_id": "M8892",
+          "patient_id": "P8892",
+          "provider_id": "PRV442",
+          "plan_id": "PLAN_A",
+          "member_status": "active",
+          "service_date": "2025-10-15",
+          "total_billed": 1600.0,
+          "diagnosis": "E11.9",
+          "procedure_lines": [
+            {
+              "line_id": "L1",
+              "code": "99213",
+              "billed": 120.0,
+              "diagnosis": "E11.9"
+            },
+            {
+              "line_id": "L2",
+              "code": "80050",
+              "billed": 150.0
+            }
+          ]
+        },
+        "historical_claims": [
+          {
+            "claim_id": "C10012",
+            "patient_id": "P8892",
+            "provider_id": "PRV442",
+            "service_date": "2025-10-15",
+            "procedure_lines": [
+              {
+                "code": "99213",
+                "billed": 100.0
+              }
+            ]
+          }
+        ]
+      },
+      "rule_checker_output": "<violations>\n    <violation>\n      <violation_id>V-0001</violation_id>\n      <claim_id>C10045</claim_id>\n      <rule_id>RULE_001</rule_id>\n      <type>duplicate</type>\n      <description>Duplicate of historical claim for CPT 99213 on 2025-10-15</description>\n      <severity>high</severity>\n      <confidence>1.00</confidence>\n      <recommended_recovery>120.00</recommended_recovery>\n      <evidence_keys>RULE_001</evidence_keys>\n      <requires_documentation>false</requires_documentation>\n    </violation>\n    <violation>\n      <violation_id>V-0002</violation_id>\n      <claim_id>C10045</claim_id>\n      <rule_id>RULE_006</rule_id>\n      <type>amount_threshold</type>\n      <description>Total billed amount $1600.00 exceeds plan threshold of $1500.00</description>\n      <severity>medium</severity>\n      <confidence>1.00</confidence>\n      <recommended_recovery>100.00</recommended_recovery>\n      <evidence_keys>RULE_006</evidence_keys>\n      <requires_documentation>false</requires_documentation>\n    </violation>\n    <violation>\n      <violation_id>V-0003</violation_id>\n      <claim_id>C10045</claim_id>\n      <rule_id>RULE_003</rule_id>\n      <type>missing_diagnosis</type>\n      <description>Procedure line L2 (80050) is missing a required diagnosis code.</description>\n      <severity>medium</severity>\n      <confidence>1.00</confidence>\n      <recommended_recovery>0.00</recommended_recovery>\n      <evidence_keys>RULE_003</evidence_keys>\n      <requires_documentation>true</requires_documentation>\n    </violation>\n    <violation>\n      <violation_id>V-0004</violation_id>\n      <claim_id>C10045</claim_id>\n      <rule_id>RULE_005</rule_id>\n      <type>non_covered_service</type>\n      <description>Procedure code 80050 is not covered by the plan.</description>\n      <severity>medium</severity>\n      <confidence>1.00</confidence>\n      <recommended_recovery>150.00</recommended_recovery>\n      <evidence_keys>RULE_005</evidence_keys>\n      <requires_documentation>false</requires_documentation>\n    </violation>\n  </violations>",
+      "evidence_output": "<evidence>\n  <item>\n    <source_id>PLAN_A_RULE_001</source_id>\n    <snippet>A claim is considered a duplicate if the same patient, provider, date of service, and CPT/HCPCS code appear in a previously paid claim within the same benefit year. Duplicate services require new clinical documentation to justify medical necessity.</snippet>\n    <relevance_score>0.95</relevance_score>\n    <claim_id>C10045</claim_id>\n  </item>\n  <item>\n    <source_id>PLAN_A_CLAIM_THRESHOLD</source_id>\n    <snippet>Total billed amount per claim must not exceed **$1,500.00**. Claims exceeding this threshold require itemized line-level breakdown and financial review.</snippet>\n    <relevance_score>0.95</relevance_score>\n    <claim_id>C10045</claim_id>\n  </item>\n  <item>\n    <source_id>PLAN_A_RULE_003</source_id>\n    <snippet>All procedure lines must include at least one valid ICD-10-CM diagnosis code that aligns with CMS medical necessity guidelines. Claims missing diagnosis codes will be returned for correction.</snippet>\n    <relevance_score>0.95</relevance_score>\n    <claim_id>C10045</claim_id>\n  </item>\n  <item>\n    <source_id>PLAN_A_NON_COVERED_CODES</source_id>\n    <snippet>The following services are explicitly excluded from coverage under Plan A: - `80050`, `80048` \u2013 General health panels and comprehensive metabolic panels - `G0101` \u2013 Cervical cancer screening (covered only under preventive benefit with specific modifiers) - `X9999`, `S9999` \u2013 Non-standard or experimental codes &gt; *Source: Plan A Benefits Handbook, Section 5.1 & 7.3*</snippet>\n    <relevance_score>0.95</relevance_score>\n    <claim_id>C10045</claim_id>\n  </item>\n</evidence>",
+      "audit_output": "<final_audit>\n  <claim_id>C10045</claim_id>\n  <summary>Four violations were identified: duplicate billing, amount exceeding plan threshold, missing diagnosis, and non-covered service. The total recommended recovery is $370.00 for medium and high severity issues.</summary>\n  <total_recommended_recovery>370.00</total_recommended_recovery>\n  <confidence_score>0.95</confidence_score>\n  <violations_count>4</violations_count>\n  <violations_reference>V-0001,V-0002,V-0003,V-0004</violations_reference>\n  <next_steps>create_appeal,request_documentation</next_steps>\n  <appeal_recommended>true</appeal_recommended>\n  <appeal_reason>Significant recovery is recommended due to duplicate billing, threshold excess, and non-covered service.</appeal_reason>\n  <audit_trail>\n    <entry agent=\"RuleCheckerAgent\" ts=\"2025-11-06T07:48:01Z\">Detected 4 violations</entry>\n    <entry agent=\"EvidenceAgent\" ts=\"2025-11-06T07:48:01Z\">Retrieved 4 evidence snippets</entry>\n    <entry agent=\"AuditSynthAgent\" ts=\"2025-11-06T07:48:01Z\">Synthesized final audit packet</entry>\n  </audit_trail>\n</final_audit>",
+      "appeal_output": "Your denial and appeal notification has been sent to the provider, including a clear explanation of the audit findings, policy references, total recovery amount, and instructions for appeal.",
+      "test_name": "duplicate_and_non_covered"
+    },
+    {
+      "input": {
+        "claim": {
+          "claim_id": "C20088",
+          "member_id": "M7721",
+          "patient_id": "P7721",
+          "provider_id": "PRV331",
+          "plan_id": "PLAN_A",
+          "member_status": "active",
+          "service_date": "2025-09-20",
+          "total_billed": 2500.0,
+          "diagnosis": "J45.90",
+          "procedure_lines": [
+            {
+              "line_id": "L1",
+              "code": "99214",
+              "billed": 125.0,
+              "diagnosis": "J45.90"
+            },
+            {
+              "line_id": "L2",
+              "code": "70450",
+              "billed": 210.0,
+              "diagnosis": "J45.90"
+            }
+          ],
+          "income_fpl_pct": 200
+        },
+        "historical_claims": []
+      },
+      "rule_checker_output": "<violations>\n    <violation>\n      <violation_id>V-0001</violation_id>\n      <claim_id>C20088</claim_id>\n      <rule_id>RULE_006</rule_id>\n      <type>amount_threshold</type>\n      <description>Total billed amount $2500.00 exceeds plan threshold of $1500.00.</description>\n      <severity>medium</severity>\n      <confidence>1.00</confidence>\n      <recommended_recovery>2500.00</recommended_recovery>\n      <evidence_keys>RULE_006</evidence_keys>\n      <requires_documentation>false</requires_documentation>\n    </violation>\n  </violations>",
+      "evidence_output": "<evidence>\n  <item>\n    <source_id>PLAN_A_CLAIM_THRESHOLD</source_id>\n    <snippet>Total billed amount per claim must not exceed **$1,500.00**. Claims exceeding this threshold require itemized line-level breakdown and financial review.</snippet>\n    <relevance_score>0.95</relevance_score>\n    <claim_id>C20088</claim_id>\n  </item>\n</evidence>",
+      "audit_output": "<final_audit>\n  <claim_id>C20088</claim_id>\n  <summary>The claim exceeds the plan's allowed billing threshold by $1,000.00, triggering a medium-severity violation and recommended recovery of $2,500.00.</summary>\n  <total_recommended_recovery>2500.00</total_recommended_recovery>\n  <confidence_score>1.00</confidence_score>\n  <violations_count>1</violations_count>\n  <violations_reference>V-0001</violations_reference>\n  <next_steps>create_appeal</next_steps>\n  <appeal_recommended>true</appeal_recommended>\n  <appeal_reason>The billed amount exceeded plan limits, so recovery is recommended unless documentation justifies the charges.</appeal_reason>\n  <audit_trail>\n    <entry agent=\"RuleCheckerAgent\" ts=\"2025-11-06T07:48:32Z\">Detected 1 violation</entry>\n    <entry agent=\"EvidenceAgent\" ts=\"2025-11-06T07:48:32Z\">Retrieved 1 evidence snippet</entry>\n    <entry agent=\"AuditSynthAgent\" ts=\"2025-11-06T07:48:32Z\">Synthesized final audit packet</entry>\n  </audit_trail>\n</final_audit>",
+      "appeal_output": "Your denial/appeal letter has been sent to the provider, clearly outlining the claim issue, policy reference, recovery amount, and appeal instructions.",
+      "test_name": "charity_care_eligible"
+    },
+    {
+      "input": {
+        "claim": {
+          "claim_id": "C30112",
+          "member_id": "M5543",
+          "patient_id": "P5543",
+          "provider_id": "PRV555",
+          "plan_id": "PLAN_A",
+          "member_status": "active",
+          "service_date": "2025-11-01",
+          "total_billed": 85.0,
+          "procedure_lines": [
+            {
+              "line_id": "L1",
+              "code": "99213",
+              "billed": 85.0
+            }
+          ]
+        },
+        "historical_claims": [
+          {
+            "claim_id": "C30101",
+            "patient_id": "P5543",
+            "provider_id": "PRV555",
+            "service_date": "2025-01-15",
+            "procedure_lines": [
+              {
+                "code": "99213",
+                "billed": 85.0
+              }
+            ]
+          },
+          {
+            "claim_id": "C30102",
+            "patient_id": "P5543",
+            "provider_id": "PRV555",
+            "service_date": "2025-02-15",
+            "procedure_lines": [
+              {
+                "code": "99213",
+                "billed": 85.0
+              }
+            ]
+          },
+          {
+            "claim_id": "C30103",
+            "patient_id": "P5543",
+            "provider_id": "PRV555",
+            "service_date": "2025-03-15",
+            "procedure_lines": [
+              {
+                "code": "99213",
+                "billed": 85.0
+              }
+            ]
+          },
+          {
+            "claim_id": "C30104",
+            "patient_id": "P5543",
+            "provider_id": "PRV555",
+            "service_date": "2025-04-15",
+            "procedure_lines": [
+              {
+                "code": "99213",
+                "billed": 85.0
+              }
+            ]
+          }
+        ]
+      },
+      "rule_checker_output": "<violations>\n    <violation>\n      <violation_id>V-0001</violation_id>\n      <claim_id>C30112</claim_id>\n      <rule_id>RULE_003</rule_id>\n      <type>missing_diagnosis</type>\n      <description>Procedure line 99213 is missing a required diagnosis code.</description>\n      <severity>medium</severity>\n      <confidence>1.00</confidence>\n      <recommended_recovery>85.00</recommended_recovery>\n      <evidence_keys>RULE_003</evidence_keys>\n      <requires_documentation>true</requires_documentation>\n    </violation>\n  </violations>",
+      "evidence_output": "<evidence>\n  <item>\n    <source_id>PLAN_A_RULE_003</source_id>\n    <snippet>All procedure lines must include at least one valid ICD-10-CM diagnosis code that aligns with CMS medical necessity guidelines. Claims missing diagnosis codes will be returned for correction.</snippet>\n    <relevance_score>0.95</relevance_score>\n    <claim_id>C30112</claim_id>\n  </item>\n</evidence>",
+      "audit_output": "<final_audit>\n  <claim_id>C30112</claim_id>\n  <summary>The claim is missing a required diagnosis code for procedure 99213, which is a medium severity violation and may result in a recovery of $85.00 unless documentation is provided.</summary>\n  <total_recommended_recovery>85.00</total_recommended_recovery>\n  <confidence_score>1.00</confidence_score>\n  <violations_count>1</violations_count>\n  <violations_reference>V-0001</violations_reference>\n  <next_steps>create_appeal,request_documentation</next_steps>\n  <appeal_recommended>true</appeal_recommended>\n  <appeal_reason>Appeal is recommended due to potential recovery for missing diagnosis documentation.</appeal_reason>\n  <audit_trail>\n    <entry agent=\"RuleCheckerAgent\" ts=\"2025-11-06T07:49:02Z\">Detected 1 violation</entry>\n    <entry agent=\"EvidenceAgent\" ts=\"2025-11-06T07:49:02Z\">Retrieved 1 evidence snippet</entry>\n    <entry agent=\"AuditSynthAgent\" ts=\"2025-11-06T07:49:02Z\">Synthesized final audit packet</entry>\n  </audit_trail>\n</final_audit>",
+      "appeal_output": "The denial letter has been sent to the provider, clearly outlining the missing diagnosis code issue, referencing Plan A documentation requirements, and providing appeal instructions with an empathetic tone.",
+      "test_name": "frequency_limit_exceeded"
+    }
+  ]
+}
